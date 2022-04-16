@@ -28,6 +28,11 @@ namespace Liwing
 		const string URLEncodeParam = "-e";
 
 		/// <summary>
+		/// Wikiリンク作成を指定するパラメータ文字列
+		/// </summary>
+		const string WikiLinkParam = "-w";
+
+		/// <summary>
 		/// Fileスキーマ
 		/// </summary>
 		private const string FileSchema = "//file/";
@@ -64,6 +69,7 @@ namespace Liwing
 				// [送る]メニューから複数のファイルを指定された場合、
 				// 複数のファイルパスが指定されているため、それに対応するように各引数に対して実行する
 				bool urlEncode = false;
+				bool wikiLink = false;
 				StringBuilder copyString =  new StringBuilder();
 				for (int index = 1; index < args.Length; index++)
 				{
@@ -78,11 +84,16 @@ namespace Liwing
 						// URLエンコードを指定するパラメータが指定されている場合は、以降のパスをURLエンコードする
 						urlEncode = true;
 					}
+					else if (arg == WikiLinkParam)
+					{
+						// Wikiリンク作成を指定するパラメータが指定されている場合
+						wikiLink = true;
+					}
 					else
 					{
-						// カスタムURLでなければ、クリップボードにコピーするためのファイルパス文字列を取得する
-						var copyFilePath = GetCopyFilePath(arg, urlEncode);
-						copyString.AppendLine(copyFilePath);
+                        // カスタムURLでなければ、クリップボードにコピーするためのファイルパス文字列を取得する
+                        var copyFilePath = GetCopyFilePath(arg, urlEncode, wikiLink);
+                        copyString.AppendLine(copyFilePath);
 					}
 				}
 
@@ -140,10 +151,11 @@ namespace Liwing
 		/// </summary>
 		/// <param name="arg">指定された引数</param>
 		/// <param name="urlEncode">urlエンコードするか</param>
-		private static string GetCopyFilePath(string arg, bool urlEncode)
+		private static string GetCopyFilePath(string arg, bool urlEncode, bool wikiLink)
 		{
 			// カスタムURL指定でない場合
 			// 送られた引数がファイルパスだと仮定して、そのパスをカスタムURLスキーマに変換した文字列をクリップボードにコピーする
+			var UNCFilePath = arg;
 
 			// URL形式とするため、バックスラッシュをスラッシュに変換
 			var urlFilePath = arg.Replace("\\", "/");
@@ -153,11 +165,7 @@ namespace Liwing
 			var endodeUrl = urlEncode ? HttpUtility.UrlEncode(urlFilePath) : urlFilePath.Replace(" ", SpaceEncodeValue);
 
 			// カスタムURLスキーマとfileスキーマを加える
-			var copyString = $"{CustomURLSchema}{FileSchema}{endodeUrl}";
-#if DEBUG
-			MessageBox.Show($"Clipboard Copy : {copyString}");
-#endif
-			return copyString;
+            return wikiLink ? $"[{UNCFilePath}]({CustomURLSchema}{FileSchema}{endodeUrl})" : $"{CustomURLSchema}{FileSchema}{endodeUrl}";
 		}
 	}
 }
