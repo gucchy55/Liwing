@@ -41,6 +41,7 @@ namespace Liwing
 		/// 半角スペースのエンコード文字列
 		/// </summary>
 		private static readonly string SpaceEncodeValue = HttpUtility.UrlEncode(" ");
+		private static readonly string PlusEncodeValue = HttpUtility.UrlEncode("+");
 
 		/// <summary>
 		/// アプリケーションの開始
@@ -162,10 +163,10 @@ namespace Liwing
 
 			// 2バイト文字などをURLエンコードした文字列に変換
 			// エンコードしない場合は、半角スペースのみエンコードする(スペースのままだと、引数として渡す時に分離されてしまうため)
-			var endodeUrl = urlEncode ? HttpUtility.UrlEncode(urlFilePath) : urlFilePath.Replace(" ", SpaceEncodeValue);
+			var encodeUrl = urlEncode ? HttpUtility.UrlEncode(urlFilePath) : urlFilePath.Replace("+", PlusEncodeValue).Replace(" ", SpaceEncodeValue);
 
 			// カスタムURLスキーマとfileスキーマを加える
-            return wikiLink ? $"[{UNCFilePath}]({CustomURLSchema}{FileSchema}{endodeUrl})" : $"{CustomURLSchema}{FileSchema}{endodeUrl}";
+			return wikiLink ? $"[{UNCFilePath}]({CustomURLSchema}{FileSchema}{encodeUrl})" : $"{CustomURLSchema}{FileSchema}{encodeUrl}";
 		}
 	}
 }
